@@ -10,10 +10,16 @@ const Color darkHeaderClr = Color(0xff424242);
 
 class Themes {
   static final light = ThemeData(
+    colorScheme: const ColorScheme.light(
+      background: white,
+    ),
     primaryColor: primaryClr,
     brightness: Brightness.light,
   );
   static final dark = ThemeData(
+    colorScheme: const ColorScheme.light(
+      background: darkHeaderClr,
+    ),
     primaryColor: darkClr,
     brightness: Brightness.dark,
   );

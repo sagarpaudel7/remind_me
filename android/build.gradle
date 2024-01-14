@@ -21,9 +21,7 @@ allprojects {
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(':app')
+    evaluationDependsOn(':app') // Remove the duplicate subprojects block
 }
 
 tasks.register("clean", Delete) {

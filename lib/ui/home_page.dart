@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:remind_me/services/notification_service.dart';
 import 'package:remind_me/services/theme_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -9,6 +11,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var notifyHelper;
+  @override
+  void initState() {
+    super.initState();
+    notifyHelper = NotifyHelper();
+    notifyHelper.initializeNotification();
+    notifyHelper.requestIOSPermissions();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,15 +32,30 @@ class _HomePageState extends State<HomePage> {
 
   _appBar() {
     return AppBar(
+      backgroundColor: context.theme.colorScheme.background,
       leading: GestureDetector(
         onTap: () {
           ThemeService().switchTheme();
+          notifyHelper.displayNotification(
+            title: "Theme Changed",
+            body:
+                Get.isDarkMode ? "Activated Light Mode" : "Activated Dark Mode",
+          );
+          notifyHelper.scheduledNotification();
         },
-        child: const Icon(Icons.nightlight_round_outlined),
+        child: Icon(
+          Get.isDarkMode
+              ? Icons.wb_sunny_rounded
+              : Icons.nightlight_round_outlined,
+          color: Get.isDarkMode ? Colors.white : Colors.black,
+        ),
       ),
-      actions: const [
-        Icon(Icons.person),
-        SizedBox(
+      actions: [
+        Icon(
+          Icons.person,
+          color: Get.isDarkMode ? Colors.white : Colors.black,
+        ),
+        const SizedBox(
           width: 10,
         )
       ],
