@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:remind_me/controllers/task_controller.dart';
+import 'package:remind_me/models/task.dart';
 import 'package:remind_me/services/notification_service.dart';
 import 'package:remind_me/services/theme_service.dart';
 import 'package:remind_me/ui/add_task_bar.dart';
 import 'package:remind_me/ui/theme_mode.dart';
 import 'package:remind_me/ui/widgets/button.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:remind_me/ui/widgets/task_tile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,6 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime _selectedDate = DateTime.now();
+  final _taskController = Get.put(TaskController());
   var notifyHelper;
   @override
   void initState() {
@@ -36,6 +41,10 @@ class _HomePageState extends State<HomePage> {
         children: [
           _addTaskBar(),
           _addDateBar(),
+          const SizedBox(
+            height: 10.0,
+          ),
+          _showTasks(),
         ],
       ),
     );
@@ -98,7 +107,10 @@ class _HomePageState extends State<HomePage> {
           ),
           MyButton(
             lable: "+ Add Task",
-            onTap: () => Get.to(const AddTaskPage()),
+            onTap: () async {
+              await Get.to(const AddTaskPage());
+              _taskController.getTasks();
+            },
           )
         ],
       ),
@@ -136,5 +148,57 @@ class _HomePageState extends State<HomePage> {
         )
       ],
     );
+  }
+
+  _showTasks() {
+    return Expanded(
+      child: Obx(
+        () {
+          return ListView.builder(
+            itemCount: _taskController.taskList.length,
+            itemBuilder: (_, int index) {
+              return AnimationConfiguration.staggeredList(
+                  position: index,
+                  child: SlideAnimation(
+                    child: FadeInAnimation(
+                        child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showBottomSheet(
+                                context, _taskController.taskList[index]);
+                          },
+                          child: TaskTile(_taskController.taskList[index]),
+                        )
+                      ],
+                    )),
+                  ));
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  _showBottomSheet(BuildContext context, Task task) {
+    Get.bottomSheet(Container(
+      padding: const EdgeInsets.only(top: 4.0),
+      height: task.isCompleted == 1
+          ? MediaQuery.of(context).size.height * 0.24
+          : MediaQuery.of(context).size.height * 0.32,
+      color: Get.isDarkMode ? darkClr : white,
+      child: Column(
+        children: [
+          Container(
+            height: 6,
+            width: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Get.isDarkMode ? Colors.grey[600] : Colors.grey[300],
+            ),
+          )
+        ],
+      ),
+    ));
   }
 }
